@@ -1,52 +1,61 @@
 package br.com.rafaelq80.personapi.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.rafaelq80.personapi.dto.request.PersonDTO;
 import br.com.rafaelq80.personapi.dto.response.MessageResponseDTO;
-import br.com.rafaelq80.personapi.model.Person;
+import br.com.rafaelq80.personapi.exception.PersonNotFoundException;
 import br.com.rafaelq80.personapi.service.PersonService;
+import lombok.AllArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/people")
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class PersonController {
 
-    /**
-     * Implementação sem Classe de serviço
-     * 
-     * @Autowired private PersonRepository personRepository;
-     * 
-     * @Autowired public PersonController(PersonRepository personRepository) {
-     * 
-     *            this.personRepository = personRepository;
-     * 
-     *            }
-     * 
-     */
-
-    private PersonService personService;
-
-    @Autowired
-    public PersonController(PersonService personService) {
-
-        this.personService = personService;
-
-    }
-
-    @GetMapping
-    public String getPeople() {
-        return "API Test!";
-    }
+    private final PersonService personService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MessageResponseDTO createPerson(@RequestBody Person person) {
-        return personService.createPerson(person);
+    public MessageResponseDTO create(@RequestBody @Valid PersonDTO personDTO) {
+        return personService.create(personDTO);
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public PersonDTO findById(@PathVariable Long id) throws PersonNotFoundException {
+        return personService.findById(id);
+    }
+
+    @GetMapping
+    public List<PersonDTO> listAll() {
+        return personService.listAll();
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public MessageResponseDTO update(@PathVariable Long id, @RequestBody @Valid PersonDTO personDTO)
+            throws PersonNotFoundException {
+        return personService.update(id, personDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) throws PersonNotFoundException {
+        personService.delete(id);
     }
 }
